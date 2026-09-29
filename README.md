@@ -418,3 +418,90 @@ código fuente                 código fuente
 Aunque hay diferencias importantes entre ambas plataformas, esta comparación les puede venir muy bien cuando pasemos de Python a Kotlin.
 
 Y un detalle interesante: **no todos los `.py` que ejecutas producen necesariamente un `.pyc` visible al lado**. El mecanismo de caché se observa especialmente con **módulos importados**, así que si quieres demostrárselo en clase conviene preparar un `import` sencillo.
+
+## Git - Manejo básico de `stash`
+
+`stash` permite **guardar temporalmente cambios pendientes sin crear un commit**, dejando limpio el directorio de trabajo para poder realizar otras tareas.
+
+Guardar los cambios actuales:
+
+```bash
+git stash push -m "Cambio provisional"
+```
+
+Consultar los cambios guardados:
+
+```bash
+git stash list
+```
+
+Por ejemplo:
+
+```text
+stash@{0}: On main: Cambio provisional
+stash@{1}: On main: Otro cambio
+```
+
+Recuperar un cambio guardado **sin eliminarlo del stash**:
+
+```bash
+git stash apply "stash@{0}"
+```
+
+Una vez comprobado que se ha recuperado correctamente, eliminarlo:
+
+```bash
+git stash drop "stash@{0}"
+```
+
+También podemos aplicar el último `stash` y eliminarlo directamente:
+
+```bash
+git stash pop
+```
+
+Si solo queremos recuperar el último `stash` sin eliminarlo, no es necesario indicar su identificador:
+
+```bash
+git stash apply
+```
+
+**Importante en PowerShell:** conviene escribir referencias como `stash@{0}` entre comillas:
+
+```powershell
+git stash apply "stash@{0}"
+git stash drop "stash@{0}"
+```
+
+PowerShell interpreta `@{...}` con un significado propio y, sin las comillas, puede procesar incorrectamente el comando antes de pasárselo a Git. Las comillas también funcionan correctamente en Linux y Git Bash, por lo que podemos utilizarlas siempre.
+
+**IMPORTANTE**, **temporalmente tienes dos copias de esos cambios**, y es intencionado.
+
+Cuando haces:
+
+```bash
+git stash apply "stash@{0}"
+```
+
+Git hace conceptualmente esto:
+
+```text
+ANTES
+
+Directorio de trabajo       STASH
+       limpio          →    Cambio provisional
+
+
+DESPUÉS DE apply
+
+Directorio de trabajo       STASH
+ Cambio provisional    ←    Cambio provisional
+                               ↑
+                         sigue guardado
+```
+
+`apply` significa literalmente **«aplica estos cambios»**, no «sácalos del stash». Git conserva la copia como medida de seguridad. Así puedes comprobar que se ha aplicado correctamente y, si estás satisfecho, eliminarla:
+
+```bash
+git stash drop "stash@{0}"
+```
