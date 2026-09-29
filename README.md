@@ -282,3 +282,139 @@ git init
 ```
 
 creará los nuevos repositorios utilizando `main` como rama principal.
+
+## Git - Archivo `.gitignore`
+
+El archivo `.gitignore` indica a Git qué archivos o directorios **no queremos incluir en el repositorio**. En un proyecto Python podemos utilizar, por ejemplo:
+
+```gitignore
+.venv/
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+.DS_Store
+```
+
+Cada entrada tiene una finalidad:
+
+- **`.venv/`** → entorno virtual de Python. Contiene el intérprete y los paquetes instalados específicamente para ese entorno. **No debe versionarse**, ya que puede recrearse en cada equipo. En versiones modernas de Python, `venv` crea además su propio `.gitignore` dentro de `.venv` con `*`, por lo que su contenido ya queda ignorado por Git. Aun así, mantener `.venv/` en el `.gitignore` del proyecto es explícito y hace la configuración independiente de la versión de Python utilizada.
+
+- **`__pycache__/`** → directorios que Python crea automáticamente para almacenar código compilado en bytecode y acelerar la carga de módulos. Se pueden regenerar automáticamente y, por tanto, no tiene sentido almacenarlos en Git.
+
+- **`*.pyc`** → archivos que contienen *bytecode* generado por Python a partir del código fuente. CPython puede utilizarlos para evitar recompilar determinados módulos cuando no han cambiado. Se generan automáticamente y no necesitamos almacenarlos en Git.
+
+- **`.vscode/`** → configuración específica de **Visual Studio Code** para el proyecto: preferencias, configuraciones de ejecución, extensiones recomendadas, etc. Para estas primeras prácticas es razonable ignorarla para evitar subir configuraciones particulares del equipo de cada alumno. En proyectos reales, algunos archivos de `.vscode` sí pueden compartirse deliberadamente con el equipo.
+
+- **`.idea/`** → directorio utilizado por los IDE de **JetBrains**, como PyCharm o IntelliJ IDEA, para almacenar configuración del proyecto. En estas prácticas evitamos versionarlo porque contiene principalmente configuración del IDE.
+
+- **`.DS_Store`** → archivo que crea automáticamente **macOS Finder** para almacenar información sobre la visualización de una carpeta (posición de iconos, vistas, etc.). No forma parte del proyecto y no debe versionarse.
+
+La idea que interesa transmitirles es que `.gitignore` **no significa «archivos que Git no puede guardar»**, sino:
+
+> **Archivos que existen en nuestro directorio de trabajo, pero hemos decidido que no forman parte del código o contenido que queremos versionar.**
+
+Y una observación importante: `.gitignore` actúa normalmente sobre archivos **que todavía no están siendo seguidos por Git**. Si previamente hemos hecho `git add`/`commit` de un archivo, añadirlo posteriormente a `.gitignore` no hace que Git deje automáticamente de seguirlo.
+
+## ¿Python es un lenguaje interpretado?
+
+Sí, pero aquí hay un matiz importante: decir que **Python es interpretado** es correcto como simplificación, pero **CPython no ejecuta directamente el código fuente `.py` línea por línea**.
+
+`Python` es el lenguaje y `CPython` es la implementación estándar que normalmente instalamos y utilizamos para ejecutar Python. **CPython** transforma el código en bytecode que después ejecuta su máquina virtual.
+
+El proceso habitual de CPython es:
+
+```text
+Código fuente Python
+     programa.py
+          │
+          ▼
+     compilación
+          │
+          ▼
+       BYTECODE
+          │
+          ▼
+Máquina virtual de Python
+          │
+          ▼
+      ejecución
+```
+
+Por ejemplo, escribimos:
+
+```python
+x = 5
+print(x)
+```
+
+CPython transforma internamente esas instrucciones en **bytecode**, unas instrucciones intermedias que entiende la máquina virtual de Python.
+
+### ¿Y los `.pyc`?
+
+Python puede guardar ese bytecode compilado para reutilizarlo posteriormente. De ahí aparecen directorios como:
+
+```text
+__pycache__/
+```
+
+y dentro archivos como:
+
+```text
+modulo.cpython-314.pyc
+```
+
+Ese `.pyc` contiene **bytecode**, no código máquina del procesador.
+
+Por eso lo ponemos en `.gitignore`:
+
+```gitignore
+__pycache__/
+*.pyc
+```
+
+porque Python puede regenerarlo cuando sea necesario.
+
+### Entonces, ¿Python es compilado o interpretado?
+
+Aquí está lo interesante. Con la implementación habitual, **CPython**, ocurren ambas cosas:
+
+```text
+.py
+ │
+ │ compilación
+ ▼
+bytecode
+ │
+ │ interpretación por la VM de Python
+ ▼
+ejecución
+```
+
+Por eso solemos clasificar Python como un **lenguaje interpretado**, porque el programador normalmente ejecuta:
+
+```bash
+python programa.py
+```
+
+sin realizar previamente un paso explícito de compilación para generar un ejecutable nativo.
+
+Pero internamente **sí existe una fase de compilación a bytecode**.
+
+Es bastante parecido conceptualmente a algo que tus alumnos verán después con Java/Kotlin:
+
+```text
+Java/Kotlin                   Python (CPython)
+
+código fuente                 código fuente
+     ↓                             ↓
+ bytecode                       bytecode
+     ↓                             ↓
+    JVM                     VM de Python
+     ↓                             ↓
+ ejecución                       ejecución
+```
+
+Aunque hay diferencias importantes entre ambas plataformas, esta comparación les puede venir muy bien cuando pasemos de Python a Kotlin.
+
+Y un detalle interesante: **no todos los `.py` que ejecutas producen necesariamente un `.pyc` visible al lado**. El mecanismo de caché se observa especialmente con **módulos importados**, así que si quieres demostrárselo en clase conviene preparar un `import` sencillo.
