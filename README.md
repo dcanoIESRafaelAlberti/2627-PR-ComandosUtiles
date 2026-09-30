@@ -1,4 +1,4 @@
-# 2627-PR - Comandos y conceptos útiles para trabajar con Python y Git
+# 2627-PR - Terminal: comandos y conceptos útiles de Python y Git
 
 ## Comprobación del ejecutable de Python que estamos ejecutando
 
